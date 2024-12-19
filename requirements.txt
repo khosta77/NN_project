@@ -1,0 +1,12 @@
+torchmetrics
+numpy
+torch
+sentencepiece
+transformers
+pandas
+numpy
+scikit-learn
+tqdm
+progressbar
+matplotlib
+urllib3==1.26.6
