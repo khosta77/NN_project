@@ -36,7 +36,7 @@ class ModelAlBertClassifier(nn.Module):
         torch.save(self.state_dict(), ('models/' + filename + '.pt'))
 
     def load(self, filename:str):
-        self.load_state_dict(torch.load(('models/' + filename + '.pt')))
+        self.load_state_dict(torch.load(filename))
 
     def predict(self, text):
         encoding = self.tokenizer.encode_plus(
