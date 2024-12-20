@@ -13,7 +13,7 @@ from tqdm import tqdm
 from torch import device, cuda
 from sklearn.model_selection import train_test_split
 
-from constant import PATH, NUM_CLASSES, MAX_SENTENCE, EPOCHS
+from constant import PATH, NUM_CLASSES, MAX_SENTENCE, BATCH_SIZE, EPOCHS
 from trainer import Trainer
 from models import init_models
 
@@ -31,7 +31,7 @@ if __name__ == "__main__":
             train_size=0.9, random_state=42)
     print(f'Обучающая выборка: {len(train_data):,}\nВалидация: {len(valid_data):,}')
 
-    trainer = Trainer(models=models, batch_size=32, epochs=15, device=DEVICE)
+    trainer = Trainer(models=models, batch_size=BATCH_SIZE, epochs=EPOCHS, device=DEVICE)
 
     result = trainer.train_models(
         train_data['annotation'], train_data['rate'],
