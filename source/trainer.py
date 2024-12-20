@@ -14,6 +14,9 @@ from torch.utils.data import Dataset, DataLoader
 from transformers import AdamW, get_linear_schedule_with_warmup
 
 from universalds import UniversalDataset
+from modelclassifier import ModelClassifier
+
+from transformers import AutoTokenizer
 
 class Trainer:
     def __init__(self, models, batch_size, epochs, device):
@@ -49,9 +52,9 @@ class Trainer:
             plt.grid()
         plt.savefig('img/' + name + '_metric_plot.png')
 
-    def _optimzer(self, model):
+    def _optimzer(self, model, classifier):
         if model['optimizer'] == 'AdamW':
-            return AdamW(model['model'].parameters(), lr=2e-5, correct_bias=False)
+            return AdamW(classifier.parameters(), lr=2e-5, correct_bias=False)
         name = model['name']
         print(f'\nВ модели {name} выбран не корректный optimzer, выбран AdamW\n')
         return AdamW(model['model'].parameters(), lr=2e-5, correct_bias=False)
@@ -71,7 +74,7 @@ class Trainer:
         valid_loader = DataLoader(valid_set, batch_size=self.batch_size, shuffle=True)
         return train_loader, valid_loader, len(train_set), len(valid_set)
 
-    def train_models(self, X_train, y_train, X_valid, y_valid, accurate_break=0.951):
+    def train_models(self, X_train, y_train, X_valid, y_valid, accurate_break=0.9):
         total_time = datetime.datetime.now()
         result = { 'model': [], 'accuracy': [], 'loss': [] }
         for i, model in enumerate(self.models):
@@ -80,15 +83,23 @@ class Trainer:
             print('-' * 100)
             print('=' * 100)
             print(f'[{i + 1}/{len(self.models)}] {name}')
-            train_loader, valid_loader, train_len, valid_len = self._move(X_train, y_train, X_valid, y_valid, model['tokenizer'])
+            train_loader, valid_loader, train_len, valid_len = self._move(
+                    X_train, y_train,
+                    X_valid, y_valid,
+                    AutoTokenizer.from_pretrained(model['tokenizer']))
 
-            optimizer = self._optimzer(model)
-            scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=0, 
-                                                        num_training_steps=len(train_loader) * self.epochs)
+            classifier = ModelClassifier(
+                    model_name=model['model'],
+                    n_classes=model['n_classes'],
+                    max_len=model['max_len'],
+                    device=model['device'])
+
+            optimizer = self._optimzer(model, classifier)
+            scheduler = get_linear_schedule_with_warmup(
+                    optimizer, num_warmup_steps=0,
+                    num_training_steps=len(train_loader) * self.epochs)
 
             criterion = self._criterion(model)
-
-            classifier = model['model']
 
             train_accuracy_epochs, train_loss_epochs, val_accuracy_epochs, val_loss_epochs = [], [], [], []
             start_model_train_time = datetime.datetime.now()
@@ -154,10 +165,10 @@ class Trainer:
                           'Чтобы не израходовать ресурсы машины:\t break')
                     break
 
-                if len(val_accuracy_epochs) >= 3:
-                    if val_accuracy_epochs[-3] > val_accuracy_epochs[-1]:
-                        print(f'\t\t!!!Мы достигли апогея обучения!!!')
-                        break
+                #if len(val_accuracy_epochs) >= 3:
+                #    if val_accuracy_epochs[-3] > val_accuracy_epochs[-1]:
+                #        print(f'\t\t!!!Мы достигли апогея обучения!!!')
+                #        break
 
             # after learning
             self._plot(
@@ -173,6 +184,9 @@ class Trainer:
             )
 
             classifier.save(name)
+            torch.cuda.empty_cache()
+            del classifier
+
             result['model'].append(name)
             result['accuracy'].append(val_accuracy_epochs[-1])
             result['loss'].append(val_loss_epochs[-1])
