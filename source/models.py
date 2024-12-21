@@ -20,16 +20,16 @@ def init_models(num_classes, max_sentence, device):
         #    'optimizer' : 'AdamW',
         #    'name'      : 'LaBSE'
         #},
-        {
-            'model'     : 'albert/albert-xxlarge-v2',
-            'n_classes' : num_classes,
-            'max_len'   : max_sentence,
-            'device'    : device,
-            'tokenizer' : 'albert/albert-xxlarge-v2',
-            'criterion' : 'CrossEntropyLoss',
-            'optimizer' : 'AdamW',
-            'name'      : 'AlbertXXlargeV2'
-        },
+        #{  # На RTX 4060 16Gb эту модель запустить нельзя
+        #    'model'     : 'albert/albert-xxlarge-v2',
+        #    'n_classes' : num_classes,
+        #    'max_len'   : max_sentence,
+        #    'device'    : device,
+        #    'tokenizer' : 'albert/albert-xxlarge-v2',
+        #    'criterion' : 'CrossEntropyLoss',
+        #    'optimizer' : 'AdamW',
+        #    'name'      : 'AlbertXXlargeV2'
+        #},
         {
             'model'     : 'microsoft/deberta-base-mnli',
             'n_classes' : num_classes,
