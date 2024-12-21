@@ -62,6 +62,8 @@ class Trainer:
     def _criterion(self, model):
         if model['criterion'] == 'CrossEntropyLoss':
             return nn.CrossEntropyLoss().to(self.device)
+        if model['criterion'] == 'BCELoss':
+            return nn.BCELoss().to(self.device)
         name = model['name']
         print(f'\nВ модели {name} выбран не корректный criterion, выбран CrossEntropyLoss\n')
         return nn.CrossEntropyLoss().to(self.device)
