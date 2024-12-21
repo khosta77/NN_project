@@ -14,11 +14,18 @@ class ModelClassifier(nn.Module):
         super(ModelClassifier, self).__init__()
         self.model = AutoModelForSequenceClassification.from_pretrained(model_name, ignore_mismatched_sizes=True)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.device = device
         self.max_len = max_len
         self.out_features = self.model.config.hidden_size
-        self.model.classifier = nn.Linear(self.out_features, n_classes)
+        self.n_classes = n_classes
+        self.device = device
+        if self.n_classes == 1:
+            self.model.classifier = nn.Sequential(
+                nn.Linear(self.out_features, self.n_classes), nn.Sigmoid()
+            )
+        else:
+            self.model.classifier = nn.Linear(self.out_features, self.n_classes)
         self.model = self.model.to(self.device)
+
 
     def fit(self):
         self.model = self.model.train()
@@ -27,7 +34,11 @@ class ModelClassifier(nn.Module):
         self.model = self.model.eval()
 
     def __call__(self, input_ids, attention_mask):
-        return self.model(input_ids=input_ids, attention_mask=attention_mask)
+        outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
+        if self.n_classes == 1:
+            outputs = outputs.logits.sigmoid()
+            outputs = outputs.view(-1)
+        return outputs
 
     def __str__(self):
         return str(self.model)
