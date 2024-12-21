@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     train_data, valid_data = train_test_split(
             pd.read_csv(PATH, usecols=['annotation', 'rate'], sep=';'),
-            train_size=0.9, random_state=42)
+            train_size=0.95, random_state=42)
     print(f'Обучающая выборка: {len(train_data):,}\nВалидация: {len(valid_data):,}')
 
     trainer = Trainer(models=models, batch_size=BATCH_SIZE, epochs=EPOCHS, device=DEVICE)
