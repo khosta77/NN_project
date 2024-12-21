@@ -1,25 +1,25 @@
 def init_models(num_classes, max_sentence, device):
     return [
-        {
-            'model'     : 'DeepPavlov/rubert-base-cased-sentence',
-            'n_classes' : num_classes,
-            'max_len'   : max_sentence,
-            'device'    : device,
-            'tokenizer' : 'DeepPavlov/rubert-base-cased-sentence',
-            'criterion' : 'CrossEntropyLoss',
-            'optimizer' : 'AdamW',
-            'name'      : 'DeepPavlov'
-        },
-        {
-            'model'     : 'sentence-transformers/LaBSE',
-            'n_classes' : num_classes,
-            'max_len'   : max_sentence,
-            'device'    : device,
-            'tokenizer' : 'sentence-transformers/LaBSE',
-            'criterion' : 'CrossEntropyLoss',
-            'optimizer' : 'AdamW',
-            'name'      : 'LaBSE'
-        },
+        #{
+        #    'model'     : 'DeepPavlov/rubert-base-cased-sentence',
+        #    'n_classes' : num_classes,
+        #    'max_len'   : max_sentence,
+        #    'device'    : device,
+        #    'tokenizer' : 'DeepPavlov/rubert-base-cased-sentence',
+        #    'criterion' : 'CrossEntropyLoss',
+        #    'optimizer' : 'AdamW',
+        #    'name'      : 'DeepPavlov'
+        #},
+        #{
+        #    'model'     : 'sentence-transformers/LaBSE',
+        #    'n_classes' : num_classes,
+        #    'max_len'   : max_sentence,
+        #    'device'    : device,
+        #    'tokenizer' : 'sentence-transformers/LaBSE',
+        #    'criterion' : 'CrossEntropyLoss',
+        #    'optimizer' : 'AdamW',
+        #    'name'      : 'LaBSE'
+        #},
         {
             'model'     : 'albert/albert-xxlarge-v2',
             'n_classes' : num_classes,
