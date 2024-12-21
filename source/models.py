@@ -1,5 +1,25 @@
 def init_models(num_classes, max_sentence, device):
     return [
+        {
+            'model'     : 'distilbert/distilbert-base-uncased',
+            'n_classes' : num_classes,
+            'max_len'   : max_sentence,
+            'device'    : device,
+            'tokenizer' : 'distilbert/distilbert-base-uncased',
+            'criterion' : 'BCELoss',
+            'optimizer' : 'AdamW',
+            'name'      : 'DistilBert'
+        },
+        {
+            'model'     : 'albert/albert-base-v2',
+            'n_classes' : num_classes,
+            'max_len'   : max_sentence,
+            'device'    : device,
+            'tokenizer' : 'albert/albert-base-v2',
+            'criterion' : 'BCELoss',
+            'optimizer' : 'AdamW',
+            'name'      : 'AlbertV2'
+        }
         #{
         #    'model'     : 'DeepPavlov/rubert-base-cased-sentence',
         #    'n_classes' : num_classes,
