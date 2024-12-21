@@ -29,6 +29,10 @@ class Trainer:
         with open(file_name, 'wb') as f:
             pickle.dump((list1, list2, list3, list4), f)
 
+    def _accuracy(self, outputs, labels):
+        self._pred = (outputs > 0.5).float()
+        return torch.sum(self._pred == labels).item() / len(labels)
+
     def _plot(
             self,
             train_loss_epochs, test_loss_epochs,
@@ -109,50 +113,43 @@ class Trainer:
             for epoch in range(self.epochs):
                 #### Train
                 classifier.fit()
-                losses = []
-                correct_predictions = 0
+                losses, accurs = [], []
                 for data in tqdm(train_loader):
                     input_ids = data["input_ids"].to(self.device)
                     attention_mask = data["attention_mask"].to(self.device)
-                    targets = data["targets"].to(self.device)
+                    labels = data["targets"].float().to(self.device)
 
-                    outputs = classifier(input_ids=input_ids, attention_mask=attention_mask)
-
-                    preds = torch.argmax(outputs.logits, dim=1)
-                    loss = criterion(outputs.logits, targets)
-
-                    correct_predictions += torch.sum(preds == targets)
-
-                    losses.append(loss.item())
+                    outputs = classifier(input_ids=input_ids, attention_mask=attention_mask).view(-1)
+                    loss = criterion(outputs, labels)
                     loss.backward()
 
-                    torch.nn.utils.clip_grad_norm_(classifier.parameters(), max_norm=1.0)
+                    nn.utils.clip_grad_norm_(classifier.parameters(), max_norm=1.0)
                     optimizer.step()
                     scheduler.step()
                     optimizer.zero_grad()
 
-                train_accuracy_epochs.append(float(correct_predictions.double() / train_len))
+                    accurs.append(self._accuracy(outputs, labels))
+                    losses.append(loss.item())
+
+                train_accuracy_epochs.append(np.mean(accurs))
                 train_loss_epochs.append(np.mean(losses))
 
                 #### Valid
                 classifier.eval()
-                losses = []
-                correct_predictions = 0
-
+                losses, accurs = [], []
                 with torch.no_grad():
                     for data in tqdm(valid_loader):
                         input_ids = data["input_ids"].to(self.device)
                         attention_mask = data["attention_mask"].to(self.device)
-                        targets = data["targets"].to(self.device)
+                        labels = data["targets"].float().to(self.device)
 
-                        outputs = classifier(input_ids=input_ids, attention_mask=attention_mask)
+                        outputs = classifier(input_ids=input_ids, attention_mask=attention_mask).view(-1)
+                        loss = criterion(outputs, labels)
 
-                        preds = torch.argmax(outputs.logits, dim=1)
-                        loss = criterion(outputs.logits, targets)
-                        correct_predictions += torch.sum(preds == targets)
+                        accurs.append(self._accuracy(outputs, labels))
                         losses.append(loss.item())
 
-                val_accuracy_epochs.append(float(correct_predictions.double() / valid_len))
+                val_accuracy_epochs.append(np.mean(accurs))
                 val_loss_epochs.append(np.mean(losses))
 
                 print(
