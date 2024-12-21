@@ -30,14 +30,14 @@ def init_models(num_classes, max_sentence, device):
         #    'optimizer' : 'AdamW',
         #    'name'      : 'AlbertXXlargeV2'
         #},
-        {
-            'model'     : 'microsoft/deberta-base-mnli',
-            'n_classes' : num_classes,
-            'max_len'   : max_sentence,
-            'device'    : device,
-            'tokenizer' : 'microsoft/deberta-base-mnli',
-            'criterion' : 'CrossEntropyLoss',
-            'optimizer' : 'AdamW',
-            'name'      : 'DeBertaBase'
-        }
+        #{  # Аналогично предыдующей
+        #    'model'     : 'microsoft/deberta-base-mnli',
+        #    'n_classes' : num_classes,
+        #    'max_len'   : max_sentence,
+        #    'device'    : device,
+        #    'tokenizer' : 'microsoft/deberta-base-mnli',
+        #    'criterion' : 'CrossEntropyLoss',
+        #    'optimizer' : 'AdamW',
+        #    'name'      : 'DeBertaBase'
+        #}
     ]
