@@ -165,10 +165,10 @@ class Trainer:
                           'Чтобы не израходовать ресурсы машины:\t break')
                     break
 
-                #if len(val_accuracy_epochs) >= 3:
-                #    if val_accuracy_epochs[-3] > val_accuracy_epochs[-1]:
-                #        print(f'\t\t!!!Мы достигли апогея обучения!!!')
-                #        break
+                if len(val_accuracy_epochs) >= 3:
+                    if val_accuracy_epochs[-3] > val_accuracy_epochs[-1]:
+                        print(f'\t\t!!!Мы достигли апогея обучения!!!')
+                        break
 
             # after learning
             self._plot(
