@@ -1,5 +1,7 @@
+import os
 import torch
 import pickle
+import logging
 import warnings
 import datetime
 import progressbar
@@ -17,10 +19,12 @@ from constant import PATH, NUM_CLASSES, MAX_SENTENCE, BATCH_SIZE, EPOCHS
 from trainer import Trainer
 from models import init_models
 
-warnings.filterwarnings('ignore')
-
 if __name__ == "__main__":
     # Странно, если в открытом пространстве, ничего не работало
+    os.environ["TOKENIZERS_PARALLELISM"] = "true"
+    warnings.filterwarnings('ignore')
+    logging.getLogger("transformers").setLevel(logging.ERROR)
+
     DEVICE=device("cuda:0" if cuda.is_available() else "cpu")
     print(DEVICE)
 
@@ -28,7 +32,7 @@ if __name__ == "__main__":
 
     train_data, valid_data = train_test_split(
             pd.read_csv(PATH, usecols=['annotation', 'rate'], sep=';'),
-            train_size=0.95, random_state=42)
+            train_size=0.9, random_state=42)
     print(f'Обучающая выборка: {len(train_data):,}\nВалидация: {len(valid_data):,}')
 
     trainer = Trainer(models=models, batch_size=BATCH_SIZE, epochs=EPOCHS, device=DEVICE)
