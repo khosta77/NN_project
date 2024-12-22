@@ -20,26 +20,26 @@ def init_models(num_classes, max_sentence, device):
         #    'optimizer' : 'AdamW',
         #    'name'      : 'AlbertV2'
         #},
-        {
-            'model'     : 'google-bert/bert-base-uncased',
-            'n_classes' : num_classes,
-            'max_len'   : max_sentence,
-            'device'    : device,
-            'tokenizer' : 'google-bert/bert-base-uncased',
-            'criterion' : 'BCELoss',
-            'optimizer' : 'AdamW',
-            'name'      : 'Bert'
-        },
-        {
-            'model'     : 'DeepPavlov/rubert-base-cased-sentence',
-            'n_classes' : num_classes,
-            'max_len'   : max_sentence,
-            'device'    : device,
-            'tokenizer' : 'DeepPavlov/rubert-base-cased-sentence',
-            'criterion' : 'BCELoss',
-            'optimizer' : 'AdamW',
-            'name'      : 'DeepPavlov'
-        },
+        #{
+        #    'model'     : 'google-bert/bert-base-uncased',
+        #    'n_classes' : num_classes,
+        #    'max_len'   : max_sentence,
+        #    'device'    : device,
+        #    'tokenizer' : 'google-bert/bert-base-uncased',
+        #    'criterion' : 'BCELoss',
+        #    'optimizer' : 'AdamW',
+        #    'name'      : 'Bert'
+        #},
+        #{
+        #    'model'     : 'DeepPavlov/rubert-base-cased-sentence',
+        #    'n_classes' : num_classes,
+        #    'max_len'   : max_sentence,
+        #    'device'    : device,
+        #    'tokenizer' : 'DeepPavlov/rubert-base-cased-sentence',
+        #    'criterion' : 'BCELoss',
+        #    'optimizer' : 'AdamW',
+        #    'name'      : 'DeepPavlov'
+        #},
         {
             'model'     : 'sentence-transformers/LaBSE',
             'n_classes' : num_classes,
