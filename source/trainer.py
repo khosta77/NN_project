@@ -94,6 +94,8 @@ class Trainer:
                     X_valid, y_valid,
                     AutoTokenizer.from_pretrained(model['tokenizer']))
 
+            if model['device'] != 'cpu':
+                torch.cuda.empty_cache()
             classifier = ModelClassifier(
                     model_name=model['model'],
                     n_classes=model['n_classes'],
@@ -110,85 +112,95 @@ class Trainer:
             train_accuracy_epochs, train_loss_epochs, val_accuracy_epochs, val_loss_epochs = [], [], [], []
             start_model_train_time = datetime.datetime.now()
 
-            for epoch in range(self.epochs):
-                #### Train
-                classifier.fit()
-                losses, accurs = [], []
-                for data in tqdm(train_loader):
-                    input_ids = data["input_ids"].to(self.device)
-                    attention_mask = data["attention_mask"].to(self.device)
-                    labels = data["targets"].float().to(self.device)
-
-                    outputs = classifier(input_ids=input_ids, attention_mask=attention_mask).view(-1)
-                    loss = criterion(outputs, labels)
-                    loss.backward()
-
-                    nn.utils.clip_grad_norm_(classifier.parameters(), max_norm=1.0)
-                    optimizer.step()
-                    scheduler.step()
-                    optimizer.zero_grad()
-
-                    accurs.append(self._accuracy(outputs, labels))
-                    losses.append(loss.item())
-
-                train_accuracy_epochs.append(np.mean(accurs))
-                train_loss_epochs.append(np.mean(losses))
-
-                #### Valid
-                classifier.eval()
-                losses, accurs = [], []
-                with torch.no_grad():
-                    for data in tqdm(valid_loader):
+            try:
+                for epoch in range(self.epochs):
+                    #### Train
+                    classifier.fit()
+                    losses, accurs = [], []
+                    for data in tqdm(train_loader):
                         input_ids = data["input_ids"].to(self.device)
                         attention_mask = data["attention_mask"].to(self.device)
                         labels = data["targets"].float().to(self.device)
 
                         outputs = classifier(input_ids=input_ids, attention_mask=attention_mask).view(-1)
                         loss = criterion(outputs, labels)
+                        loss.backward()
+
+                        nn.utils.clip_grad_norm_(classifier.parameters(), max_norm=1.0)
+                        optimizer.step()
+                        scheduler.step()
+                        optimizer.zero_grad()
 
                         accurs.append(self._accuracy(outputs, labels))
                         losses.append(loss.item())
 
-                val_accuracy_epochs.append(np.mean(accurs))
-                val_loss_epochs.append(np.mean(losses))
+                    train_accuracy_epochs.append(np.mean(accurs))
+                    train_loss_epochs.append(np.mean(losses))
 
-                print(
-                    f'Epoch [{(epoch+1)}/{self.epochs}]: (Train/Validation) ',
-                    f'Loss: {train_loss_epochs[-1]:.3f}/{val_loss_epochs[-1]:.3f}, ',
-                    f'Accuracy: {train_accuracy_epochs[-1]:.3f}/{val_accuracy_epochs[-1]:.3f}, ',
-                    f't: {(datetime.datetime.now() - start_model_train_time)}'
-                )
+                    #### Valid
+                    classifier.eval()
+                    losses, accurs = [], []
+                    with torch.no_grad():
+                        for data in tqdm(valid_loader):
+                            input_ids = data["input_ids"].to(self.device)
+                            attention_mask = data["attention_mask"].to(self.device)
+                            labels = data["targets"].float().to(self.device)
 
-                if train_accuracy_epochs[-1] >= accurate_break and val_accuracy_epochs[-1] >= accurate_break:
-                    print('На обучающей и тестовой выборке достигли желаемого результата.\n',
-                          'Чтобы не израходовать ресурсы машины:\t break')
-                    break
+                            outputs = classifier(input_ids=input_ids, attention_mask=attention_mask).view(-1)
+                            loss = criterion(outputs, labels)
 
-                if len(val_accuracy_epochs) >= 3:
-                    if val_accuracy_epochs[-3] > val_accuracy_epochs[-1]:
-                        print(f'\t\t!!!Мы достигли апогея обучения!!!')
+                            accurs.append(self._accuracy(outputs, labels))
+                            losses.append(loss.item())
+
+                    val_accuracy_epochs.append(np.mean(accurs))
+                    val_loss_epochs.append(np.mean(losses))
+
+                    print(
+                        f'Epoch [{(epoch+1)}/{self.epochs}]: (Train/Validation) ',
+                        f'Loss: {train_loss_epochs[-1]:.3f}/{val_loss_epochs[-1]:.3f}, ',
+                        f'Accuracy: {train_accuracy_epochs[-1]:.3f}/{val_accuracy_epochs[-1]:.3f}, ',
+                        f't: {(datetime.datetime.now() - start_model_train_time)}'
+                    )
+
+                    if train_accuracy_epochs[-1] >= accurate_break and val_accuracy_epochs[-1] >= accurate_break:
+                        print('На обучающей и тестовой выборке достигли желаемого результата.\n',
+                              'Чтобы не израходовать ресурсы машины:\t break')
                         break
 
-            # after learning
-            self._plot(
-                train_loss_epochs, val_loss_epochs,
-                train_accuracy_epochs, val_accuracy_epochs,
-                self.epochs, name
-            )
+                    if len(val_accuracy_epochs) >= 3:
+                        if val_accuracy_epochs[-3] > val_accuracy_epochs[-1]:
+                            print(f'\t\t!!!Мы достигли апогея обучения!!!')
+                            break
+            except Exception as e:
+                print('X' * 100)
+                print(e)
+                print('X' * 100)
+                del classifier
+                if model['device'] != 'cpu':
+                    torch.cuda.empty_cache()
+                continue
+            else:
+                # after learning
+                self._plot(
+                    train_loss_epochs, val_loss_epochs,
+                    train_accuracy_epochs, val_accuracy_epochs,
+                    self.epochs, name
+                )
 
-            self._save_lists_to_file(
-                ('log/' + name + '.log'),
-                train_loss_epochs, val_loss_epochs,
-                train_accuracy_epochs, val_accuracy_epochs,
-            )
+                self._save_lists_to_file(
+                    ('log/' + name + '.log'),
+                    train_loss_epochs, val_loss_epochs,
+                    train_accuracy_epochs, val_accuracy_epochs,
+                )
 
-            classifier.save(name)
-            torch.cuda.empty_cache()
-            del classifier
+                classifier.save(name)
+                del classifier
+                if model['device'] != 'cpu':
+                    torch.cuda.empty_cache()
 
-            result['model'].append(name)
-            result['accuracy'].append(val_accuracy_epochs[-1])
-            result['loss'].append(val_loss_epochs[-1])
+                result['model'].append(name)
+                result['accuracy'].append(val_accuracy_epochs[-1])
+                result['loss'].append(val_loss_epochs[-1])
 
         # after learnings models
         print('=' * 100)
