@@ -40,6 +40,16 @@ def init_models(num_classes, max_sentence, device):
         #    'optimizer' : 'AdamW',
         #    'name'      : 'DeepPavlov'
         #},
+        #{
+        #    'model'     : 'sentence-transformers/LaBSE',
+        #    'n_classes' : num_classes,
+        #    'max_len'   : max_sentence,
+        #    'device'    : device,
+        #    'tokenizer' : 'sentence-transformers/LaBSE',
+        #    'criterion' : 'CrossEntropyLoss',
+        #    'optimizer' : 'AdamW',
+        #    'name'      : 'LaBSE_CrossEntropyLoss'
+        #},
         {
             'model'     : 'sentence-transformers/LaBSE',
             'n_classes' : num_classes,
@@ -48,7 +58,7 @@ def init_models(num_classes, max_sentence, device):
             'tokenizer' : 'sentence-transformers/LaBSE',
             'criterion' : 'CrossEntropyLoss',
             'optimizer' : 'AdamW',
-            'name'      : 'LaBSE_CrossEntropyLoss'
+            'name'      : 'LaBSE_CrossEntropyLoss_two'
         },
         #{  # На RTX 4060 16Gb эту модель запустить нельзя
         #    'model'     : 'albert/albert-xxlarge-v2',
