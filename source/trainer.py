@@ -29,9 +29,14 @@ class Trainer:
         with open(file_name, 'wb') as f:
             pickle.dump((list1, list2, list3, list4), f)
 
-    def _accuracy(self, outputs, labels):
-        self._pred = (outputs > 0.5).float()
-        return torch.sum(self._pred == labels).item() / len(labels)
+    def _accuracy(self, outputs, labels, size):
+        if size == 1:
+            self._pred = (outputs > 0.5).float()
+            return torch.sum(self._pred == labels).item() / len(labels)
+        else:
+            preds = torch.argmax(outputs, dim=1)
+            return torch.sum(preds == labels) / len(labels)
+        return -1
 
     def _plot(
             self,
@@ -120,7 +125,8 @@ class Trainer:
                     for data in tqdm(train_loader):
                         input_ids = data["input_ids"].to(self.device)
                         attention_mask = data["attention_mask"].to(self.device)
-                        labels = data["targets"].float().to(self.device)
+                        labels = data["targets"].float().to(self.device) if classifier.n_classes == 1 \
+                                else data["targets"].to(self.device)
 
                         outputs = classifier(input_ids=input_ids, attention_mask=attention_mask)
                         loss = criterion(outputs, labels)
@@ -131,7 +137,7 @@ class Trainer:
                         scheduler.step()
                         optimizer.zero_grad()
 
-                        accurs.append(self._accuracy(outputs, labels))
+                        accurs.append(self._accuracy(outputs, labels, classifier.n_classes))
                         losses.append(loss.item())
 
                     train_accuracy_epochs.append(np.mean(accurs))
@@ -144,12 +150,13 @@ class Trainer:
                         for data in tqdm(valid_loader):
                             input_ids = data["input_ids"].to(self.device)
                             attention_mask = data["attention_mask"].to(self.device)
-                            labels = data["targets"].float().to(self.device)
+                            labels = data["targets"].float().to(self.device) if classifier.n_classes == 1 \
+                                else data["targets"].to(self.device)
 
                             outputs = classifier(input_ids=input_ids, attention_mask=attention_mask)
                             loss = criterion(outputs, labels)
 
-                            accurs.append(self._accuracy(outputs, labels))
+                            accurs.append(self._accuracy(outputs, labels, classifier.n_classes))
                             losses.append(loss.item())
 
                     val_accuracy_epochs.append(np.mean(accurs))
