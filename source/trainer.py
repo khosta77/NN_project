@@ -122,7 +122,7 @@ class Trainer:
                         attention_mask = data["attention_mask"].to(self.device)
                         labels = data["targets"].float().to(self.device)
 
-                        outputs = classifier(input_ids=input_ids, attention_mask=attention_mask).view(-1)
+                        outputs = classifier(input_ids=input_ids, attention_mask=attention_mask)
                         loss = criterion(outputs, labels)
                         loss.backward()
 
@@ -146,7 +146,7 @@ class Trainer:
                             attention_mask = data["attention_mask"].to(self.device)
                             labels = data["targets"].float().to(self.device)
 
-                            outputs = classifier(input_ids=input_ids, attention_mask=attention_mask).view(-1)
+                            outputs = classifier(input_ids=input_ids, attention_mask=attention_mask)
                             loss = criterion(outputs, labels)
 
                             accurs.append(self._accuracy(outputs, labels))

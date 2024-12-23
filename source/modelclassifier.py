@@ -37,7 +37,9 @@ class ModelClassifier(nn.Module):
         outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
         if self.n_classes == 1:
             outputs = outputs.logits.sigmoid()
-            outputs = outputs.view(-1)
+            outputs = outputs.view(-1).view(-1)
+        else:
+            outputs = outputs.logits
         return outputs
 
     def __str__(self):
