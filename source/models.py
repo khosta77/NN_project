@@ -46,9 +46,9 @@ def init_models(num_classes, max_sentence, device):
             'max_len'   : max_sentence,
             'device'    : device,
             'tokenizer' : 'sentence-transformers/LaBSE',
-            'criterion' : 'BCELoss',
+            'criterion' : 'CrossEntropyLoss',
             'optimizer' : 'AdamW',
-            'name'      : 'LaBSE'
+            'name'      : 'LaBSE_CrossEntropyLoss'
         },
         #{  # На RTX 4060 16Gb эту модель запустить нельзя
         #    'model'     : 'albert/albert-xxlarge-v2',
