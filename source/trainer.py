@@ -137,8 +137,8 @@ class Trainer:
                         scheduler.step()
                         optimizer.zero_grad()
 
-                        accurs.append(self._accuracy(outputs, labels, classifier.n_classes))
-                        losses.append(loss.item())
+                        accurs.append(float(self._accuracy(outputs, labels, classifier.n_classes)))
+                        losses.append(float(loss.item()))
 
                     train_accuracy_epochs.append(np.mean(accurs))
                     train_loss_epochs.append(np.mean(losses))
@@ -156,8 +156,8 @@ class Trainer:
                             outputs = classifier(input_ids=input_ids, attention_mask=attention_mask)
                             loss = criterion(outputs, labels)
 
-                            accurs.append(self._accuracy(outputs, labels, classifier.n_classes))
-                            losses.append(loss.item())
+                            accurs.append(float(self._accuracy(outputs, labels, classifier.n_classes)))
+                            losses.append(float(loss.item()))
 
                     val_accuracy_epochs.append(np.mean(accurs))
                     val_loss_epochs.append(np.mean(losses))
