@@ -26,7 +26,6 @@ class ModelClassifier(nn.Module):
             self.model.classifier = nn.Linear(self.out_features, self.n_classes)
         self.model = self.model.to(self.device)
 
-
     def fit(self):
         self.model = self.model.train()
 
@@ -49,7 +48,7 @@ class ModelClassifier(nn.Module):
         torch.save(self.state_dict(), ('models/' + filename + '.pt'))
 
     def load(self, filename:str):
-        self.load_state_dict(torch.load(filename))
+        self.load_state_dict(torch.load(filename, map_location=self._device))
 
     def predict(self, text):
         encoding = self.tokenizer.encode_plus(
